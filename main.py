@@ -9,17 +9,21 @@ def image_difference(img_a, img_b):
 
 # Cli parameters
 
-if(len(sys.argv) != 2):
+if len(sys.argv) != 2:
     sys.exit("Usage:\npython main.py target_img")
 
 target_img_dir = sys.argv[1]
-
+canvas_img_dir = sys.argv[2] if len(sys.argv >= 2) else None
 
 # GA parameters
 
-target_img = cv.imread("assets/" + sys.argv[1])
+target_img = cv.imread("assets/" + target_img_dir)
 
-fitness_function = lambda gene, gene_idx : image_difference(target_img, image_from_gene(gene))
+canvas_img_dir = cv.imread("assets/" + canvas_img_dir) if canvas_img_dir else 
+if canvas_img_dir != None:
+    canvas_img = cv.imread("assets/" + canvas_img_dir)
+
+fitness_function = lambda gene, gene_idx : 1.0 / image_difference(target_img, image_from_gene(canvas_img, gene))
 
 # genes -> [stroke x position, stroke y position, scale, stroke rotation]
 gene_space = [range(0, target_img.shape[1] + 1),
