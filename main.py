@@ -9,8 +9,17 @@ import numpy as np
 def image_difference(img_a, img_b):
     return cv.norm(img_a, img_b, cv.NORM_L2)
 
-def image_from_gene(canvas_img, gene):
-    canvas_img = canvas_img.clone()
+def image_from_gene(target_img, canvas_img, gene):
+    canvas_img = canvas_img.copy()
+    
+    # Get the target image's average color inside the stroke area
+    mask = np.zeros((target_img.shape[0], target_img.shape[1]), np.uint8)
+    cv.circle(mask, (int(gene[0]), int(gene[1])), int(gene[2] * 64), (255, 255, 255), -1)
+    mean_color = cv.mean(target_img, mask=mask)[:-1]
+
+    cv.circle(canvas_img, (int(gene[0]), int(gene[1])), int(gene[2] * 64), mean_color[1:], -1)
+
+    return canvas_img
 
 
 # Cli parameters
@@ -24,26 +33,48 @@ canvas_img_dir = sys.argv[2] if len(sys.argv) > 2 else None
 
 # Load images
 
-target_img = cv.imread("assets/" + target_img_dir)
+target_img = cv.imread(target_img_dir)
 
-canvas_img = cv.imread("assets/" + canvas_img_dir) if canvas_img_dir else np.full_like(target_img, (255, 255, 255))
-if (canvas_img.shape != target_img).all():
+canvas_img = cv.imread(canvas_img_dir) if canvas_img_dir else np.full_like(target_img, (255, 255, 255))
+if canvas_img.shape != target_img.shape:
     sys.exit("Canvas image and target image must be the same size!")
 
+"""
+radius = 32
+pos = (1000, 500)
+
+mask = np.zeros((target_img.shape[0], target_img.shape[1]), np.uint8)
+cv.circle(mask, pos, radius, (255, 255, 255), -1)
+mean_color = cv.mean(target_img, mask=mask)[:-1]
+
+cv.imshow("XD", cv.bitwise_and(target_img, target_img, mask=mask))
+cv.waitKey()
+
+cv.circle(mask, pos, radius, mean_color, -1)
+
+
+print(mean_color)
+
+cv.imshow("XD",mask)
+cv.waitKey()
+
+exit()
+"""
 
 # GA parameters
 
-generations = 64
-population_size = 32
+generations = 32
+population_size = 16
 
 parallel_processing = 8
 
-fitness_function = lambda gene, gene_idx : 1.0 / image_difference(target_img, image_from_gene(canvas_img, gene))
+def fitness_function(gene, gene_idx):
+    return 1.0 / image_difference(target_img, image_from_gene(target_img, canvas_img, gene))
 
-# genes -> [stroke x position, stroke y position, scale, stroke rotation]
+# genes -> [stroke x position, stroke y position, stroke scale, stroke rotation]
 gene_space = [range(0, target_img.shape[1] + 1),
               range(0, target_img.shape[0] + 1),
-              {"low": 0.33, "high": 3.0},
+              {"low": 0.1, "high": 10.0},
               {"low": 0.0, "high": 360.0}]
 
 def on_start(ga_instance):
@@ -52,24 +83,31 @@ def on_start(ga_instance):
 def on_stop(ga_instance, last_population_fitness):
     print("Stopping GA...");
 
-ga_instance = pygad.GA(num_generations=generations,
-                       fitness_function=fitness_function,
-                       sol_per_pop=population_size,
-                       parallel_processing=parallel_processing,
-                       genes_space=gene_space,
-                       on_start=on_start,
-                       on_stop=on_stop)
+def on_generation(ga_instance):
+    print("Generation " + str(ga_instance.generations_completed) + " finished")
+
+for _ in range(64):
+    ga_instance = pygad.GA(num_generations=generations,
+                           fitness_func=fitness_function,
+                           sol_per_pop=population_size,
+                           num_parents_mating=10,
+                           num_genes=4,
+                           parallel_processing=parallel_processing,
+                           gene_space=gene_space,
+                           on_start=on_start,
+                           on_stop=on_stop,
+                           on_generation=on_generation)
 
 
-# GA execution
+    # GA execution
 
-ga_instance.run()
-
-
+    ga_instance.run()
 
 
+    # Show result
 
-# Tests
+    solution, solution_fitness, solution_idx = ga_instance.best_solution()
+    canvas_img = image_from_gene(target_img, canvas_img, solution)
 
-cv.imshow("XD", canvas_img)
+cv.imshow("Output", canvas_img)
 cv.waitKey()
