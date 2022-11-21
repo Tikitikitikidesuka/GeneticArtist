@@ -3,8 +3,14 @@ import pygad
 import cv2 as cv
 import numpy as np
 
+
+# Helper functions
+
 def image_difference(img_a, img_b):
     return cv.norm(img_a, img_b, cv.NORM_L2)
+
+def image_from_gene(canvas_img, gene):
+    canvas_img = canvas_img.clone()
 
 
 # Cli parameters
@@ -15,6 +21,7 @@ if len(sys.argv) < 2:
 target_img_dir = sys.argv[1]
 canvas_img_dir = sys.argv[2] if len(sys.argv) > 2 else None
 
+
 # Load images
 
 target_img = cv.imread("assets/" + target_img_dir)
@@ -24,11 +31,12 @@ if (canvas_img.shape != target_img).all():
     sys.exit("Canvas image and target image must be the same size!")
 
 
-
-
-
-
 # GA parameters
+
+generations = 64
+population_size = 32
+
+parallel_processing = 8
 
 fitness_function = lambda gene, gene_idx : 1.0 / image_difference(target_img, image_from_gene(canvas_img, gene))
 
@@ -44,9 +52,18 @@ def on_start(ga_instance):
 def on_stop(ga_instance, last_population_fitness):
     print("Stopping GA...");
 
-#ga_instance = pygad.GA(num_generations=num_generations...
+ga_instance = pygad.GA(num_generations=generations,
+                       fitness_function=fitness_function,
+                       sol_per_pop=population_size,
+                       parallel_processing=parallel_processing,
+                       genes_space=gene_space,
+                       on_start=on_start,
+                       on_stop=on_stop)
 
 
+# GA execution
+
+ga_instance.run()
 
 
 
