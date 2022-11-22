@@ -17,7 +17,7 @@ def image_from_gene(target_img, canvas_img, gene):
     cv.circle(mask, (int(gene[0]), int(gene[1])), int(gene[2] * 64), (255, 255, 255), -1)
     mean_color = cv.mean(target_img, mask=mask)[:-1]
 
-    cv.circle(canvas_img, (int(gene[0]), int(gene[1])), int(gene[2] * 64), mean_color[1:], -1)
+    cv.circle(canvas_img, (int(gene[0]), int(gene[1])), int(gene[2] * 64), mean_color, -1)
 
     return canvas_img
 
@@ -69,7 +69,8 @@ population_size = 16
 parallel_processing = 8
 
 def fitness_function(gene, gene_idx):
-    return 1.0 / image_difference(target_img, image_from_gene(target_img, canvas_img, gene))
+    diff = image_difference(target_img, image_from_gene(target_img, canvas_img, gene))
+    return 1.0 / diff if diff != 0 else float("inf")
 
 # genes -> [stroke x position, stroke y position, stroke scale, stroke rotation]
 gene_space = [range(0, target_img.shape[1] + 1),
@@ -86,7 +87,7 @@ def on_stop(ga_instance, last_population_fitness):
 def on_generation(ga_instance):
     print("Generation " + str(ga_instance.generations_completed) + " finished")
 
-for _ in range(64):
+for _ in range(1024):
     ga_instance = pygad.GA(num_generations=generations,
                            fitness_func=fitness_function,
                            sol_per_pop=population_size,
