@@ -2,7 +2,7 @@ import sys
 import pygad
 import cv2 as cv
 import numpy as np
-
+from user_interface import cli
 
 # Helper functions
 
@@ -21,50 +21,18 @@ def image_from_gene(target_img, canvas_img, gene):
 
     return canvas_img
 
-
-# Cli parameters
-
-if len(sys.argv) < 2:
-    sys.exit("Usage:\npython main.py target_img <canvas_img>")
-
-target_img_dir = sys.argv[1]
-canvas_img_dir = sys.argv[2] if len(sys.argv) > 2 else None
-
-
 # Load images
 
-target_img = cv.imread(target_img_dir)
+target_img = cv.imread(cli.ARGS.TARGET_IMG_FILE)
 
-canvas_img = cv.imread(canvas_img_dir) if canvas_img_dir else np.full_like(target_img, (255, 255, 255))
+canvas_img = cv.imread(cli.ARGS.CANVAS_IMG_FILE) if cli.ARGS.CANVAS_IMG_FILE else np.full_like(target_img, (255, 255, 255))
 if canvas_img.shape != target_img.shape:
     sys.exit("Canvas image and target image must be the same size!")
 
-"""
-radius = 32
-pos = (1000, 500)
-
-mask = np.zeros((target_img.shape[0], target_img.shape[1]), np.uint8)
-cv.circle(mask, pos, radius, (255, 255, 255), -1)
-mean_color = cv.mean(target_img, mask=mask)[:-1]
-
-cv.imshow("XD", cv.bitwise_and(target_img, target_img, mask=mask))
-cv.waitKey()
-
-cv.circle(mask, pos, radius, mean_color, -1)
-
-
-print(mean_color)
-
-cv.imshow("XD",mask)
-cv.waitKey()
-
-exit()
-"""
-
 # GA parameters
 
-generations = 32
-population_size = 16
+generations = 128
+population_size = 32
 
 parallel_processing = 8
 
@@ -79,13 +47,16 @@ gene_space = [range(0, target_img.shape[1] + 1),
               {"low": 0.0, "high": 360.0}]
 
 def on_start(ga_instance):
-    print("Starting GA...");
+    #print("Starting GA...");
+    pass
 
 def on_stop(ga_instance, last_population_fitness):
-    print("Stopping GA...");
+    #print("Stopping GA...");
+    pass
 
 def on_generation(ga_instance):
-    print("Generation " + str(ga_instance.generations_completed) + " finished")
+    #print("Generation " + str(ga_instance.generations_completed) + " finished")
+    pass
 
 for _ in range(1024):
     ga_instance = pygad.GA(num_generations=generations,
@@ -109,6 +80,9 @@ for _ in range(1024):
 
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
     canvas_img = image_from_gene(target_img, canvas_img, solution)
+
+    cv.imshow("Output", canvas_img)
+    cv.waitKey(1)
 
 cv.imshow("Output", canvas_img)
 cv.waitKey()
