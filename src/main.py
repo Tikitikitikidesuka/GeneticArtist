@@ -1,8 +1,10 @@
+import cli
 import sys
 import pygad
 import cv2 as cv
 import numpy as np
-from user_interface import cli
+import image_ops
+
 
 # Helper functions
 
@@ -25,7 +27,10 @@ def image_from_gene(target_img, canvas_img, gene):
 
 target_img = cv.imread(cli.ARGS.TARGET_IMG_FILE)
 
-canvas_img = cv.imread(cli.ARGS.CANVAS_IMG_FILE) if cli.ARGS.CANVAS_IMG_FILE else np.full_like(target_img, (255, 255, 255))
+canvas_img = (cv.imread(cli.ARGS.CANVAS_IMG_FILE)
+              if cli.ARGS.CANVAS_IMG_FILE
+              else image_ops.color_like(target_img, (255, 255, 255)))
+
 if canvas_img.shape != target_img.shape:
     sys.exit("Canvas image and target image must be the same size!")
 
