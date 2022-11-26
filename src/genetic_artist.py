@@ -112,7 +112,6 @@ class GeneticArtist:
         return 1.0 / diff if diff != 0 else float('inf')
 
     def draw_circle(self):
-        print("Circle")
         self._ga_instance.run()
         solution, solution_fitness, solution_idx = self._ga_instance.best_solution()
         self._canvas_img = self._image_from_gene(solution)
