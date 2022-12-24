@@ -81,11 +81,15 @@ class GeneticArtist:
             self._canvas_img = image_ops.color_like(self._target_img, (255, 255, 255))
 
         # Setup genetic algorithm
-        # genes -> [stroke x position, stroke y position, stroke scale, stroke rotation]
-        self._gene_space = [range(0, self._target_img.shape[1] + 1),
-                            range(0, self._target_img.shape[0] + 1),
-                            {'low': 0.1, 'high': 10.0},
-                            {'low': 0.0, 'high': 360.0}]
+        # genes -> [stroke type, stroke x position, stroke y position, stroke scale, stroke rotation]
+        genes = {
+            'type': range(0, len(self._stroke_img_list)),
+            'xPos': range(0, self._target_img.shape[1] + 1),
+            'yPos': range(0, self._target_img.shape[0] + 1),
+            'scale': {'low': 0.1, 'high': 10.0},
+            'stroke': {'low': 0.0, 'high': 360.0},
+        }
+        self._init_gene_tables(genes)
         self._ga_instance = pygad.GA(num_generations=32,
                                      fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
                                      sol_per_pop=32,
@@ -94,16 +98,28 @@ class GeneticArtist:
                                      parallel_processing=8,
                                      gene_space=self._gene_space)
 
+    def _init_gene_tables(self, genes: dict):
+        gene_idx = 0
+        self._gene_idx_table = {}
+        for gene_name in genes.keys():
+            self._gene_idx_table[gene_name] = gene_idx
+            gene_idx += 1
+
+        self._gene_space = list(genes.values())
+
+    def _gene_idx(self, gene_name: str):
+        return self._gene_idx_table[gene_name]
+
     def _image_from_gene(self, gene):
         canvas = self._canvas_img.copy()
 
         # Get the target image's average color inside the stroke area
         mask = np.zeros((self._target_img.shape[0], self._target_img.shape[1]), np.uint8)
-        cv.circle(mask, (int(gene[0]), int(gene[1])), int(gene[2] * 64), (255, 255, 255), -1)
+        cv.circle(mask, (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')])), int(gene[self._gene_idx('scale')] * 64), (255, 255, 255), -1)
         mean_color = cv.mean(self._target_img, mask=mask)
 
         # Draw
-        cv.circle(canvas, (int(gene[0]), int(gene[1])), int(gene[2] * 64), mean_color, -1)
+        cv.circle(canvas, (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')])), int(gene[self._gene_idx('scale')] * 64), mean_color, -1)
 
         return canvas
 
