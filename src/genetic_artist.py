@@ -50,6 +50,10 @@ class ImageNotFoundError(GeneticArtistException):
         super().__init__(f'Image \'{file_path}\' not found')
 
 
+def callback_gen(ga_instance):
+    print("Generation : ", ga_instance.generations_completed)
+    print("Fitness of the best solution :", ga_instance.best_solution()[1])
+
 class GeneticArtist:
     def __init__(self, target_img_path: str, stroke_img_dir_path: str, canvas_img_path: str = None,
                  config_file_path: str = None):
@@ -66,7 +70,7 @@ class GeneticArtist:
         # Store stroke images
         stroke_img_dir_ls = glob.glob(f'{stroke_img_dir_path}/*')
         for file in stroke_img_dir_ls:
-            read_img = cv.imread(file)
+            read_img = cv.imread(file, cv.IMREAD_GRAYSCALE)
             if read_img is not None:
                 self._stroke_img_list.append(read_img)
         if len(self._stroke_img_list) == 0:
@@ -86,16 +90,17 @@ class GeneticArtist:
             'type': range(0, len(self._stroke_img_list)),
             'xPos': range(0, self._target_img.shape[1] + 1),
             'yPos': range(0, self._target_img.shape[0] + 1),
-            'scale': {'low': 0.1, 'high': 10.0},
-            'stroke': {'low': 0.0, 'high': 360.0},
+            'scale': {'low': 0.1, 'high': 1.0},
+            'angle': {'low': 0.0, 'high': 360.0},
         }
         self._init_gene_tables(genes)
-        self._ga_instance = pygad.GA(num_generations=32,
+        self._ga_instance = pygad.GA(num_generations=16,#32,
                                      fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
-                                     sol_per_pop=32,
-                                     num_parents_mating=10,
+                                     sol_per_pop=16,#32,
+                                     num_parents_mating=16,#10,
                                      num_genes=len(self._gene_space),
-                                     parallel_processing=8,
+                                     parallel_processing=None,#8,
+                                     on_generation=callback_gen,
                                      gene_space=self._gene_space)
 
     def _init_gene_tables(self, genes: dict):
@@ -111,17 +116,30 @@ class GeneticArtist:
         return self._gene_idx_table[gene_name]
 
     def _image_from_gene(self, gene):
-        canvas = self._canvas_img.copy()
+        # Select stroke
+        stroke = self._stroke_img_list[int(gene[self._gene_idx('type')])].copy()
 
-        # Get the target image's average color inside the stroke area
-        mask = np.zeros((self._target_img.shape[0], self._target_img.shape[1]), np.uint8)
-        cv.circle(mask, (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')])), int(gene[self._gene_idx('scale')] * 64), (255, 255, 255), -1)
-        mean_color = cv.mean(self._target_img, mask=mask)
+        # Scale stroke
+        stroke = image_ops.scale_stroke(stroke, gene[self._gene_idx('scale')])
+        # Rotate stroke
+        stroke = image_ops.rotate_stroke(stroke, gene[self._gene_idx('angle')])
 
-        # Draw
-        cv.circle(canvas, (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')])), int(gene[self._gene_idx('scale')] * 64), mean_color, -1)
 
-        return canvas
+        position = (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')]))
+        # Get stroke color
+        color = image_ops.get_mean_stroke_color(self._target_img, stroke, position)
+        # Draw stroke
+        return image_ops.paint_stroke(self._canvas_img, stroke, color, position)
+
+        """
+        selected_img_height, selected_img_width = selected_img.shape
+        new_dimensions = (int(selected_img_width * scale_factor), int(selected_img_height * scale_factor))
+        scaled_img = cv.resize(selected_img, new_dimensions)
+
+        center = (int(new_dimensions[0] / 2), int(new_dimensions[1] / 2))
+        M = cv.getRotationMatrix2D(center, rotation_angle, 1.0)
+        rotated_img = cv.warpAffine(scaled_img, M, new_dimensions)
+        """
 
     def _fitness_function(self, gene, gene_idx):
         diff = image_ops.image_difference(self._target_img, self._image_from_gene(gene))
