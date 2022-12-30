@@ -42,28 +42,27 @@ def crop_image_by_mask_and_position(target_img: np.array, mask: np.array, positi
     x_pos = position[0] - width // 2
     if x_pos < 0:
         xp_diff = -x_pos
-        mask = mask[:, xp_diff:]
         x_pos = 0
 
+    xl_diff = 0
     x_lim = x_pos + width - xp_diff
     if x_lim > target_width:
         xl_diff = x_lim - target_width
-        mask = mask[:, :width - xl_diff]
         x_lim = target_width
 
     yp_diff = 0
     y_pos = position[1] - height // 2
     if y_pos < 0:
         yp_diff = -y_pos
-        mask = mask[yp_diff:, :]
         y_pos = 0
 
+    yl_diff = 0
     y_lim = y_pos + height - yp_diff
     if y_lim > target_height:
         yl_diff = y_lim - target_height
-        mask = mask[:height - yl_diff, :]
         y_lim = target_height
 
+    mask = mask[yp_diff:height-yl_diff, xp_diff:width-xl_diff]
     target_crop = target_img[y_pos:y_lim, x_pos:x_lim]
 
     if target_crop.shape[:2] != mask.shape[:2]:
