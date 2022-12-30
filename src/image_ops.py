@@ -35,37 +35,57 @@ def rotate_stroke(stroke_img: np.array, angle: float):
 
 
 def crop_image_by_mask_and_position(target_img: np.array, mask: np.array, position: tuple[int, int]) -> tuple[np.array, np.array]:
+    target_height, target_width = target_img.shape[:2]
+    height, width = mask.shape[:2]
+
+    xp_diff = 0
     x_pos = position[0] - width // 2
     if x_pos < 0:
-        diff = -x_pos
-        stroke_img = stroke_img[0:height-1, diff:width-1-diff]
+        xp_diff = -x_pos
+        mask = mask[:, xp_diff:]
         x_pos = 0
 
-    x_lim = x_pos + width - 1
-    if x_lim >= width:
-        diff = x_lim - width-1
-        stroke_img = stroke_img[0:height-1, 0:width-1-diff]
-        x_lim = width-1
+    x_lim = x_pos + width - xp_diff
+    if x_lim > target_width:
+        xl_diff = x_lim - target_width
+        mask = mask[:, :width - xl_diff]
+        x_lim = target_width
 
+    yp_diff = 0
     y_pos = position[1] - height // 2
     if y_pos < 0:
-        diff = -y_pos
-        stroke_img = stroke_img[diff:height-1-diff, 0:width-1]
+        yp_diff = -y_pos
+        mask = mask[yp_diff:, :]
         y_pos = 0
 
-    y_lim = y_pos + height - 1
-    if y_lim >= height:
-        diff = y_lim - height - 1
-        stroke_img = stroke_img[0:height-1-diff, 0:width-1]
-        y_lim = height-1
+    y_lim = y_pos + height - yp_diff
+    if y_lim > target_height:
+        yl_diff = y_lim - target_height
+        mask = mask[:height - yl_diff, :]
+        y_lim = target_height
 
     target_crop = target_img[y_pos:y_lim, x_pos:x_lim]
-    print(target_crop.shape[:2], " vs ", stroke_img.shape[:2])
+
+    if target_crop.shape[:2] != mask.shape[:2]:
+        print("Position: ", position)
+        print("Before: ", target_img.shape[:2], " vs ", mask.shape[:2])
+
+        print("xp_diff: ", xp_diff)
+        print("xl_diff: ", xl_diff)
+        print("yp_diff: ", yp_diff)
+        print("yl_diff: ", yl_diff)
+
+        print("x_pos: ", x_pos)
+        print("x_lim: ", x_lim)
+        print("y_pos: ", y_pos)
+        print("y_lim: ", y_lim)
+
+        print("after: ", target_crop.shape[:2], " vs ", mask.shape[:2])
+
+    return target_crop, mask
 
 
 def get_mean_stroke_color(target_img: np.array, stroke_img: np.array, position: tuple[int, int]):
-    target_height, target_width = target_img.shape[:2]
-    height, width = stroke_img.shape[:2]
     target_crop, stroke_img = crop_image_by_mask_and_position(target_img, stroke_img, position)
     return cv.mean(target_crop, mask=stroke_img)[:3]
 
@@ -94,26 +114,28 @@ def paint_stroke(canvas_img: np.array, stroke_img: np.array, stroke_color: tuple
 
 
 """
-target = cv.imread('../assets/target_img.png')
-canvas = cv.imread('../assets/canvas_img.png')
+import random
+
+target = cv.imread('../assets/small_target_img.png')
+canvas = cv.imread('../assets/small_canvas_img.png')
 overlay = cv.imread('../assets/strokes/stroke_05.png', cv.IMREAD_GRAYSCALE)
 
-for i in range(100):
+#for i in range(100):
+i = 0
+while True:
     stroke = overlay.copy()
-    scale = random.randint(0, 100) / 50 + 0.5
-    print("Scale: ", scale)
-    print("Prescale: ", stroke.shape[:2])
+    scale = random.randint(10, 100) / 100
     stroke = scale_stroke(stroke, scale)
-    print("Postscale: ", stroke.shape[:2])
-    stroke = rotate_stroke(stroke, random.randint(0, 360))
-    print("Postrotate: ", stroke.shape[:2])
+    stroke = rotate_stroke(stroke, random.randint(0, 36000) / 100)
 
-    position = (random.randint(100, 500), random.randint(100, 500))
+    position = (random.randint(0, canvas.shape[1]), random.randint(0, canvas.shape[0]))
     color = get_mean_stroke_color(target, stroke, position)
     output = paint_stroke(canvas, stroke, color, position)
 
-    cv.imshow("Output", output)
-    cv.waitKey()
+    print(i)
+    i += 1
+    #cv.imshow("Output", output)
+    #cv.waitKey()
 
 import time
 
