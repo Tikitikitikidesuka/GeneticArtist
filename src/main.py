@@ -1,6 +1,6 @@
 import cli
 import cv2 as cv
-from src.genetic_artist import GeneticArtist
+from genetic_artist import GeneticArtist
 
 genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR,
                                canvas_img_path=cli.ARGS.CANVAS_IMG_FILE,
