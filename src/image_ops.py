@@ -104,7 +104,7 @@ def paint_stroke(canvas_img: np.array, stroke_img: np.array, stroke_color: tuple
         if 0 <= gy < boundy:
             for x in range(width):
                 gx = x + x_pos
-                if gy >= 0 and gx < boundx:
+                if 0 <= gx < boundx:
                     background_color = canvas_img[gy, gx]
                     overlay_alpha = stroke_img[y, x] / 255
                     output[gy, gx] = background_color * (1 - overlay_alpha) + stroke_color * overlay_alpha
