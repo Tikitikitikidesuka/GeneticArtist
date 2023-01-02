@@ -1,9 +1,11 @@
 import glob
-import sys
 import pygad
 import cv2 as cv
 import numpy as np
 import image_ops
+from pathos.multiprocessing import Pool
+# Multiprocessing: https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq
+# Why pathos: https://stackoverflow.com/a/21345308
 
 
 class GeneticArtistException(Exception):
@@ -55,6 +57,23 @@ def callback_gen(ga_instance):
     print("Fitness of the best solution :", ga_instance.best_solution()[1])
 
 
+class PooledGA(pygad.GA):
+    _threads: int
+
+    def __init__(self, threads, **kwargs):
+        super().__init__(**kwargs)
+        self._threads = threads
+
+    def fitness_wrapper(self, solution):
+        return self.fitness_func(solution, 0)
+
+    def cal_pop_fitness(self):
+        with Pool(processes=self._threads) as pool:
+            pop_fitness = pool.map(self.fitness_wrapper, self.population)
+            pop_fitness = np.array(pop_fitness)
+            return pop_fitness
+
+
 class GeneticArtist:
     def __init__(self, target_img_path: str, stroke_img_dir_path: str, canvas_img_path: str = None,
                  config_file_path: str = None):
@@ -95,12 +114,15 @@ class GeneticArtist:
             'angle': {'low': 0.0, 'high': 360.0},
         }
         self._init_gene_tables(genes)
-        self._ga_instance = pygad.GA(num_generations=8,  # 32,
+
+        threads = 8
+        self._ga_instance = PooledGA(threads,
+                                     num_generations=8,  # 32,
                                      fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
                                      sol_per_pop=8,  # 32,
-                                     num_parents_mating=8,  # 10,
+                                     num_parents_mating=8, # 10,
                                      num_genes=len(self._gene_space),
-                                     parallel_processing=None,#8,
+                                     parallel_processing=None,
                                      on_generation=callback_gen,
                                      gene_space=self._gene_space)
 
@@ -127,12 +149,12 @@ class GeneticArtist:
 
         position = (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')]))
         # Get stroke color
-        color = image_ops.get_mean_stroke_color(self._target_img, stroke, position)
+        color = image_ops.get_mean_stroke_color(self._target_img.copy(), stroke, position)
         # Draw stroke
-        return image_ops.paint_stroke(self._canvas_img, stroke, color, position)
+        return image_ops.paint_stroke(self._canvas_img.copy(), stroke, color, position)
 
     def _fitness_function(self, gene, _gene_idx):
-        diff = image_ops.image_difference(self._target_img, self._image_from_gene(gene))
+        diff = image_ops.image_difference(self._target_img.copy(), self._image_from_gene(gene))
         return 1.0 / diff if diff != 0 else float('inf')
 
     def draw_stroke(self):
