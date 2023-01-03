@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from numba import jit
 
 
 def color_like(reference_img: np.array, color: tuple[int, int, int]):
@@ -34,6 +35,7 @@ def rotate_stroke(stroke_img: np.array, angle: float):
     return cv.warpAffine(stroke_img, M, (new_width, new_height))
 
 
+@jit(nopython=True)
 def crop_image_by_mask_and_position(target_img: np.array, mask: np.array, position: tuple[int, int]) -> tuple[np.array, np.array]:
     target_height, target_width = target_img.shape[:2]
     height, width = mask.shape[:2]
@@ -73,6 +75,7 @@ def get_mean_stroke_color(target_img: np.array, stroke_img: np.array, position: 
     return cv.mean(target_crop, mask=stroke_img)[:3]
 
 
+@jit(nopython=True)
 def paint_stroke(canvas_img: np.array, stroke_img: np.array, stroke_color: tuple[int, int, int],
                  position: tuple[int, int]) -> np.array:
     output = canvas_img.copy()
