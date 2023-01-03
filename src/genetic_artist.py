@@ -116,24 +116,18 @@ class GeneticArtist:
         self._init_gene_tables(genes)
 
         # As it stands, multiprocessing is slower than running on a single core
-        processes = 1
-        if processes > 1:
-            self._ga_instance = PooledGA(processes,
-                                         num_generations=8,  # 32,
-                                         fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
-                                         sol_per_pop=32,  # 32,
-                                         num_parents_mating=8,  # 10,
-                                         num_genes=len(self._gene_space),
-                                         on_generation=callback_gen,
-                                         gene_space=self._gene_space)
-        else:
-            self._ga_instance = pygad.GA(num_generations=8,  # 32,
-                                         fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
-                                         sol_per_pop=32,  # 32,
-                                         num_parents_mating=8,  # 10,
-                                         num_genes=len(self._gene_space),
-                                         on_generation=callback_gen,
-                                         gene_space=self._gene_space)
+        self._processes = 1
+
+        # Setup PyGAD parameters
+        self._ga_parameters = {
+            'num_generations': 8,
+            'fitness_func': lambda g, gidx: self._fitness_function(g, gidx),
+            'sol_per_pop': 32,
+            'num_parents_mating': 8,
+            'num_genes': len(self._gene_space),
+            'on_generation': callback_gen,
+            'gene_space': self._gene_space,
+        }
 
     def _init_gene_tables(self, genes: dict):
         gene_idx = 0
@@ -167,8 +161,17 @@ class GeneticArtist:
         return 1.0 / diff if diff != 0 else float('inf')
 
     def draw_stroke(self):
-        self._ga_instance.run()
-        solution, solution_fitness, solution_idx = self._ga_instance.best_solution()
+        # Create PyGAD instance since it is the only way or resetting the population
+        if self._processes > 1:
+            ga_instance = PooledGA(self._processes, **self._ga_parameters)
+        else:
+            ga_instance = pygad.GA(**self._ga_parameters)
+
+        # Run said instance
+        ga_instance.run()
+
+        # Extract and paint the best stroke
+        solution, solution_fitness, solution_idx = ga_instance.best_solution()
         self._canvas_img = self._image_from_gene(solution)
 
     def get_image(self):
