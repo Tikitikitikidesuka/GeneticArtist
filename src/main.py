@@ -8,7 +8,7 @@ genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR
 
 for _ in range(256):
     genetic_artist.draw_stroke()
-    cv.imshow('Output', genetic_artist._canvas_img)
+    cv.imshow('Output', genetic_artist.get_image())
     cv.waitKey(1)
 
 cv.waitKey()

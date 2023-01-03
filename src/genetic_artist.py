@@ -119,8 +119,8 @@ class GeneticArtist:
         self._ga_instance = PooledGA(threads,
                                      num_generations=8,  # 32,
                                      fitness_func=lambda g, gidx: self._fitness_function(g, gidx),
-                                     sol_per_pop=8,  # 32,
-                                     num_parents_mating=8, # 10,
+                                     sol_per_pop=32,  # 32,
+                                     num_parents_mating=8,  # 10,
                                      num_genes=len(self._gene_space),
                                      on_generation=callback_gen,
                                      gene_space=self._gene_space)
@@ -160,3 +160,6 @@ class GeneticArtist:
         self._ga_instance.run()
         solution, solution_fitness, solution_idx = self._ga_instance.best_solution()
         self._canvas_img = self._image_from_gene(solution)
+
+    def get_image(self):
+        return self._canvas_img.copy()
