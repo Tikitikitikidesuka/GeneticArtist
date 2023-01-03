@@ -3,7 +3,7 @@ import pygad
 import cv2 as cv
 import numpy as np
 import image_ops
-from pathos.threading import ThreadPool
+from pathos.multiprocessing import Pool
 # Multiprocessing: https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq
 # Why pathos: https://stackoverflow.com/a/21345308
 
@@ -68,7 +68,7 @@ class PooledGA(pygad.GA):
         return self.fitness_func(solution, 0)
 
     def cal_pop_fitness(self):
-        with ThreadPool(nodes=self._threads) as pool:
+        with Pool(processes=self._threads) as pool:
             pop_fitness = pool.map(self.fitness_wrapper, self.population)
             pop_fitness = np.array(pop_fitness)
             return pop_fitness
