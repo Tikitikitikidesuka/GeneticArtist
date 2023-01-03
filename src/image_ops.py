@@ -65,22 +65,6 @@ def crop_image_by_mask_and_position(target_img: np.array, mask: np.array, positi
     mask = mask[yp_diff:height-yl_diff, xp_diff:width-xl_diff]
     target_crop = target_img[y_pos:y_lim, x_pos:x_lim]
 
-    if target_crop.shape[:2] != mask.shape[:2]:
-        print("Position: ", position)
-        print("Before: ", target_img.shape[:2], " vs ", mask.shape[:2])
-
-        print("xp_diff: ", xp_diff)
-        print("xl_diff: ", xl_diff)
-        print("yp_diff: ", yp_diff)
-        print("yl_diff: ", yl_diff)
-
-        print("x_pos: ", x_pos)
-        print("x_lim: ", x_lim)
-        print("y_pos: ", y_pos)
-        print("y_lim: ", y_lim)
-
-        print("after: ", target_crop.shape[:2], " vs ", mask.shape[:2])
-
     return target_crop, mask
 
 
