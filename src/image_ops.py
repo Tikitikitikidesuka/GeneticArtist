@@ -110,3 +110,45 @@ def paint_stroke(canvas_img: np.array, stroke_img: np.array, stroke_color: tuple
                     output[gy, gx] = background_color * (1 - overlay_alpha) + stroke_color * overlay_alpha
 
     return output
+
+
+"""
+import random
+
+target = cv.imread('../assets/small_target_img.png')
+canvas = cv.imread('../assets/small_canvas_img.png')
+overlay = cv.imread('../assets/strokes/stroke_05.png', cv.IMREAD_GRAYSCALE)
+
+#for i in range(100):
+i = 0
+while True:
+    stroke = overlay.copy()
+    scale = random.randint(10, 100) / 100
+    stroke = scale_stroke(stroke, scale)
+    stroke = rotate_stroke(stroke, random.randint(0, 36000) / 100)
+
+    position = (random.randint(0, canvas.shape[1]), random.randint(0, canvas.shape[0]))
+    color = get_mean_stroke_color(target, stroke, position)
+    output = paint_stroke(canvas, stroke, color, position)
+
+    print(i)
+    i += 1
+    #cv.imshow("Output", output)
+    #cv.waitKey()
+
+import time
+
+color = get_mean_stroke_color(target, overlay, (100, 100))
+start_time = time.time()
+output = paint_stroke(canvas, overlay, color[:3], (100, 100))
+print("--- %s seconds ---" % (time.time() - start_time))
+
+cv.imshow("Output", output)
+cv.waitKey()
+
+for i in range(0, 360 * 5):
+    output = rotate_stroke(overlay, i)
+    cv.imshow("Output", output)
+    cv.waitKey(10)
+cv.waitKey()
+"""

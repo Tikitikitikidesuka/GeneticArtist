@@ -122,6 +122,7 @@ class GeneticArtist:
                                      sol_per_pop=8,  # 32,
                                      num_parents_mating=8, # 10,
                                      num_genes=len(self._gene_space),
+                                     parallel_processing=None,
                                      on_generation=callback_gen,
                                      gene_space=self._gene_space)
 
@@ -148,12 +149,12 @@ class GeneticArtist:
 
         position = (int(gene[self._gene_idx('xPos')]), int(gene[self._gene_idx('yPos')]))
         # Get stroke color
-        color = image_ops.get_mean_stroke_color(self._target_img, stroke, position)
+        color = image_ops.get_mean_stroke_color(self._target_img.copy(), stroke, position)
         # Draw stroke
-        return image_ops.paint_stroke(self._canvas_img, stroke, color, position)
+        return image_ops.paint_stroke(self._canvas_img.copy(), stroke, color, position)
 
     def _fitness_function(self, gene, _gene_idx):
-        diff = image_ops.image_difference(self._target_img, self._image_from_gene(gene))
+        diff = image_ops.image_difference(self._target_img.copy(), self._image_from_gene(gene))
         return 1.0 / diff if diff != 0 else float('inf')
 
     def draw_stroke(self):
