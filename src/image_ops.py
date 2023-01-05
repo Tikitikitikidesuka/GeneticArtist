@@ -8,7 +8,7 @@ def color_like(reference_img: np.array, color: tuple[int, int, int]):
 
 
 def image_difference(img_a: np.array, img_b: np.array):
-    return cv.norm(img_a, img_b, cv.NORM_L2)
+    return cv.norm(img_a, img_b, cv.NORM_L2) / (img_a.shape[0] * img_a.shape[1] * img_a.shape[2] * 255)
 
 
 def scale_stroke(stroke_img: np.array, scale: float):

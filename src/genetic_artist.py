@@ -132,13 +132,19 @@ class GeneticArtist:
 
         # Setup PyGAD parameters
         self._ga_parameters = {
-            'num_generations': 8,
+            'num_generations': 32,
             'fitness_func': lambda g, gidx: self._fitness_function(g, gidx),
-            'sol_per_pop': 32,
-            'num_parents_mating': 8,
+            'sol_per_pop': 64,
+            'num_parents_mating': 64 // 4,
             'num_genes': len(self._gene_space),
             'on_generation': callback_gen,
             'gene_space': self._gene_space,
+            'keep_elitism': 2,
+            'parent_selection_type': 'sss',
+            'crossover_type': 'uniform',
+            'mutation_type': 'random',
+            'mutation_probability': 0.2,
+            'mutation_by_replacement': True,
         }
 
     def _init_gene_tables(self, genes: dict):
@@ -170,7 +176,7 @@ class GeneticArtist:
 
     def _fitness_function(self, gene, _gene_idx):
         diff = image_ops.image_difference(self._target_img, self._image_from_gene(gene))
-        return 1.0 / diff if diff != 0 else float('inf')
+        return 1 - diff
 
     def draw_stroke(self):
         # Create PyGAD instance since it is the only way or resetting the population
