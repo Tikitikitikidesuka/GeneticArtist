@@ -15,11 +15,11 @@ def show_progress(window_name: str, image_queue: Queue):
 
     image = image_queue.get()
     while image is not None:
-        cv.imshow('Output', image)
+        cv.imshow(window_name, image)
         cv.waitKey(_LOOP_WAIT)
         image = image_queue.get()
 
-    while cv.getWindowProperty('Output', cv.WND_PROP_VISIBLE) and cv.waitKey(_LOOP_WAIT) & 0xFF != 27:
+    while cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) and cv.waitKey(_LOOP_WAIT) & 0xFF != 27:
         # Wait for window to get closed or ESC key to be pressed
         pass
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     # Create image queue and display process
     image_queue = Queue()
-    display_process = Process(target=show_progress, args=("Output", image_queue))
+    display_process = Process(target=show_progress, args=('Output', image_queue))
 
     # Add blank canvas to image queue and start display process
     image_queue.put(genetic_artist.get_image())
