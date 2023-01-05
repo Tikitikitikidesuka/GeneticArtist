@@ -52,9 +52,21 @@ class ImageNotFoundError(GeneticArtistException):
         super().__init__(f'Image \'{file_path}\' not found')
 
 
+class OutputImageError(GeneticArtistException):
+    """Exception raised when outputing an image as a file fails
+
+    Attributes:
+        output_path -- output path of the image
+    """
+
+    def __init__(self, output_path: str):
+        super().__init__(f'Failed to write output to \'{output_path}\'')
+
+
 def callback_gen(ga_instance):
-    print("Generation : ", ga_instance.generations_completed)
-    print("Fitness of the best solution :", ga_instance.best_solution()[1])
+    #print("Generation : ", ga_instance.generations_completed)
+    #print("Fitness of the best solution :", ga_instance.best_solution()[1])
+    pass
 
 
 class PooledGA(pygad.GA):
@@ -176,3 +188,7 @@ class GeneticArtist:
 
     def get_image(self):
         return self._canvas_img.copy()
+
+    def store_image(self, output_file: str):
+        if not cv.imwrite(output_file, self._canvas_img):
+            raise OutputImageError(output_file)
