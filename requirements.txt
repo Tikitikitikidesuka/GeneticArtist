@@ -1,4 +1,6 @@
 opencv_contrib_python~=4.6.0.66
+opencv-python~=4.7.0.68
+pathvalidate~=2.5.2
 numpy~=1.23.3
 numba~=0.56.4
 pygad~=2.18.1
