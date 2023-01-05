@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # Create genetic artist
     genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR,
                                    canvas_img_path=cli.ARGS.CANVAS_IMG_FILE,
-                                   config_file_path=cli.ARGS.GENETIC_ARTIST_CONFIG_FILE)
+                                   config_file_path=cli.ARGS.CONFIG_FILE)
 
     # Create image queue and display process
     image_queue = Queue()
@@ -42,12 +42,15 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    # Run genetic artist for n strokes
-    for _ in range(512):
+    # Run genetic artist
+    for _ in range(cli.ARGS.ITERATIONS):
         genetic_artist.draw_stroke()
         image_queue.put(genetic_artist.get_image())
 
     print("Time: ", time.time() - start, " seconds")
+
+    # Store final image
+    genetic_artist.store_image(cli.ARGS.OUTPUT_FILE)
 
     # End display process
     image_queue.put(None)
