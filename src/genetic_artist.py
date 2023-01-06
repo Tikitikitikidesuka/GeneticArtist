@@ -63,12 +63,6 @@ class OutputImageError(GeneticArtistException):
         super().__init__(f'Failed to write output to \'{output_path}\'')
 
 
-def callback_gen(ga_instance):
-    #print("Generation : ", ga_instance.generations_completed)
-    #print("Fitness of the best solution :", ga_instance.best_solution()[1])
-    pass
-
-
 class PooledGA(pygad.GA):
     _threads: int
 
@@ -137,7 +131,6 @@ class GeneticArtist:
             'sol_per_pop': 64,
             'num_parents_mating': 64 // 4,
             'num_genes': len(self._gene_space),
-            'on_generation': callback_gen,
             'gene_space': self._gene_space,
             'keep_elitism': 2,
             'parent_selection_type': 'sss',
