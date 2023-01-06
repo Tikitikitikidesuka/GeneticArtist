@@ -90,6 +90,7 @@ def main():
         try:
             display_process.start()
             run_genetic_artist(genetic_artist, image_queue=image_queue, verbose=cli.ARGS.VERBOSE)
+            store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
             display_process.join()
         except KeyboardInterrupt:
             def interrupt_func():
@@ -104,12 +105,12 @@ def main():
     else:
         try:
             run_genetic_artist(genetic_artist, verbose=cli.ARGS.VERBOSE)
+            store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
         except KeyboardInterrupt:
             def interrupt_func():
                 store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
 
             interrupt_program(interrupt_func)
-
 
 if __name__ == '__main__':
     try:
