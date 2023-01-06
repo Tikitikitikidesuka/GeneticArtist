@@ -62,4 +62,4 @@ This project wouldn't be possible without the following open source packages:
 
 ## License
 
-_Genetic Artist_ is distributed under the MIT License. See `LICENSE.txt` for more information.
+_Genetic Artist_ is distributed under the MIT License. See `LICENSE.md` for more information.
