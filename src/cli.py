@@ -10,14 +10,14 @@ def is_valid_path(arg: str) -> bool:
 
 def is_valid_file(arg: str) -> str:
     if not is_valid_path(arg) or not os.path.isfile(arg):
-        argparse.ArgumentTypeError("Unable to locate the file %s" % arg)
+        raise argparse.ArgumentTypeError("Unable to locate the file %s" % arg)
 
     return arg
 
 
 def is_valid_filename_pv(arg: str) -> str:
     if not is_valid_filename(arg):
-        argparse.ArgumentTypeError("%s is not a valid filename" % arg)
+        raise argparse.ArgumentTypeError("%s is not a valid filename" % arg)
 
     return arg
 
@@ -52,5 +52,6 @@ _parser.add_argument('-i', '--iterations', dest='ITERATIONS', required=True, hel
 _parser.add_argument('-o', '--output', dest='OUTPUT_FILE', required=True, help='Output image filename', type=is_valid_filename_pv)
 _parser.add_argument('--canvas', dest='CANVAS_IMG_FILE', help='Canvas image the artist starts with', type=is_valid_file)
 _parser.add_argument('-v', '--verbose', dest='VERBOSE', help='Print the proccess\'s progress', action='store_true')
+_parser.add_argument('--nogui', dest='NO_GUI', help='Do not show the graphical interface', action='store_true')
 
 ARGS = _parser.parse_args()

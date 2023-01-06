@@ -1,57 +1,118 @@
-import time
+def interrupt_program(before_exit=None):
+    print("Interrupted!")
+    print("Terminating")
 
-import cli
-import cv2 as cv
-from genetic_artist import GeneticArtist
-from multiprocessing import Process, Queue
+    if before_exit:
+        before_exit()
 
-
-class NoMoreImages:
-    pass
+    exit(1)
 
 
-def show_progress(window_name: str, image_queue: Queue):
-    _LOOP_WAIT = 50
+try:
+    import cli
+    import signal
+    import cv2 as cv
+    from multiprocessing import Process, Queue, Event
+    from genetic_artist import GeneticArtist, GeneticArtistException
+except KeyboardInterrupt:
+    interrupt_program()
 
+
+# Not very good function ahead... Remember to fix it sometime
+def show_progress_process(window_name: str, image_queue: Queue):
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+    loop_wait = 50
     image = image_queue.get()
     while image is not None:
         cv.imshow(window_name, image)
-        cv.waitKey(_LOOP_WAIT)
-        image = image_queue.get()
+        cv.waitKey(loop_wait)
+        if not image_queue.empty():
+            image = image_queue.get()
 
-    while cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) and cv.waitKey(_LOOP_WAIT) & 0xFF != 27:
-        # Wait for window to get closed or ESC key to be pressed
+    while not cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) and cv.waitKey(loop_wait) & 0xFF != 27:
         pass
 
     cv.destroyAllWindows()
 
 
-if __name__ == '__main__':
-    # Create genetic artist
-    genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR,
-                                   canvas_img_path=cli.ARGS.CANVAS_IMG_FILE,
-                                   config_file_path=cli.ARGS.CONFIG_FILE)
-
-    # Create image queue and display process
-    image_queue = Queue()
-    display_process = Process(target=show_progress, args=('Output', image_queue))
-
-    # Add blank canvas to image queue and start display process
-    image_queue.put(genetic_artist.get_image())
-    display_process.start()
-
-    start = time.time()
-
-    # Run genetic artist
-    for _ in range(cli.ARGS.ITERATIONS):
-        genetic_artist.draw_stroke()
+def run_genetic_artist(genetic_artist: GeneticArtist, image_queue: Queue = None, verbose=False):
+    if image_queue:
         image_queue.put(genetic_artist.get_image())
 
-    print("Time: ", time.time() - start, " seconds")
+    for iteration in range(cli.ARGS.ITERATIONS):
+        genetic_artist.draw_stroke()
 
-    # Store final image
-    genetic_artist.store_image(cli.ARGS.OUTPUT_FILE)
+        if verbose:
+            print("Stroke number %d finished" % iteration)
 
-    # End display process
-    image_queue.put(None)
-    display_process.join()
+        if image_queue:
+            image_queue.put(genetic_artist.get_image())
+
+    if image_queue:
+        image_queue.put(None)
+
+
+def store_genetic_artist_result(genetic_artist: GeneticArtist, output_file: str, verbose=False):
+    if verbose:
+        print("Storing the final image into %s..." % output_file)
+
+    try:
+        genetic_artist.store_image(output_file)
+    except GeneticArtistException as exception:
+        print(exception.message)
+        return
+
+    if verbose:
+        print("Image stored successfully")
+
+
+def main():
+    if cli.ARGS.VERBOSE:
+        print("Creating the genetic artist...")
+
+    try:
+        genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR,
+                                       canvas_img_path=cli.ARGS.CANVAS_IMG_FILE,
+                                       config_file_path=cli.ARGS.CONFIG_FILE)
+    except GeneticArtistException as exception:
+        print(exception.message)
+        exit(1)
+
+    if cli.ARGS.VERBOSE:
+        print("Genetic artist created successfully")
+        print("Starting the drawing process...")
+
+    if not cli.ARGS.NO_GUI:
+        image_queue = Queue()
+        display_process = Process(name='DisplayProcess', target=show_progress_process, args=('Output', image_queue))
+
+        try:
+            display_process.start()
+            run_genetic_artist(genetic_artist, image_queue=image_queue, verbose=cli.ARGS.VERBOSE)
+            display_process.join()
+        except KeyboardInterrupt:
+            def interrupt_func():
+                if display_process.is_alive():
+                    image_queue.put(None)
+                display_process.join()
+
+                store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
+
+            interrupt_program(interrupt_func)
+
+    else:
+        try:
+            run_genetic_artist(genetic_artist, verbose=cli.ARGS.VERBOSE)
+        except KeyboardInterrupt:
+            def interrupt_func():
+                store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
+
+            interrupt_program(interrupt_func)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        interrupt_program()
