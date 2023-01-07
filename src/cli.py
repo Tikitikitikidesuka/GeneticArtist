@@ -16,16 +16,11 @@ def is_valid_file(arg: str) -> str:
 
 
 def is_valid_new_filepath(arg: str) -> str:
-    try:
-        head, tail = os.path.split(arg)
-        if not os.path.exists(head):
-            raise argparse.ArgumentTypeError("Directory %s does not exist" % head)
-        if not is_valid_filename(tail):
-            raise argparse.ArgumentTypeError("%s is not a valid filename" % tail)
-    except ValueError:
-        # If the filepath is just a filename and not a full path,
-        # head will be an empty string and tail will be the filename
-        pass
+    head, tail = os.path.split(arg)
+    if head and not os.path.exists(head):
+        raise argparse.ArgumentTypeError("Directory %s does not exist" % head)
+    if not is_valid_filename(tail):
+        raise argparse.ArgumentTypeError("%s is not a valid filename" % tail)
 
     return arg
 
