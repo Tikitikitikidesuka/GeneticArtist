@@ -30,7 +30,7 @@ def show_progress_process(window_name: str, image_queue: Queue):
         if not image_queue.empty():
             image = image_queue.get()
 
-    while not cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) and cv.waitKey(loop_wait) & 0xFF != 27:
+    while cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) and cv.waitKey(loop_wait) & 0xFF != 27:
         pass
 
     cv.destroyAllWindows()
