@@ -103,4 +103,4 @@ The example images are provided by [Pixabay](https://pixabay.com/):
 
 ## License
 
-_Genetic Artist_ is distributed under the MIT License. See `LICENSE.md` for more information.
+_Genetic Artist_ is distributed under the MIT License. See [`LICENSE.md`](https://github.com/Tikitikitikidesuka/GeneticArtist/blob/168171a1d6d329c7f488cee31380a57f945ed343/LICENSE.md) for more information.
