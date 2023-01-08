@@ -48,7 +48,10 @@ pip install -r requirements.txt
 4. Run the artist:
 
 ```shell
-python src/main.py --target <Target Image> --strokes <Stroke Directory> --iterations <Number of Strokes To Draw> --output <Ouptut Image>
+python src/main.py --target <Target Image> \
+                   --strokes <Stroke Directory> \
+                   --iterations <Number of Strokes To Draw> \
+                   --output <Ouptut Image>
 ```
 
 ## Try it Out!
@@ -63,7 +66,11 @@ Here are a few examples to get you started:
 To create a painting of the night sky, navigate to the project folder and run the following command:
 
 ```shell
-python src/main.py --target examples/targets/moon.jpg --strokes examples/strokes/ --canvas examples/canvases/white.jpg --i 256 --output outputs/my_moon256.png
+python src/main.py --target examples/targets/moon.jpg \
+                   --strokes examples/strokes/ \
+                   --canvas examples/canvases/white.jpg \
+                   --iterations 256 \
+                   --output outputs/my_moon256.png
 ```
 
 This will produce a beautiful painting like the one shown below:
@@ -77,7 +84,11 @@ This will produce a beautiful painting like the one shown below:
 If you prefer a peaceful lake landscape, run this command instead:
 
 ```shell
-python src/main.py --target examples/targets/lake.jpg --strokes examples/strokes/ --canvas examples/canvases/black.jpg --i 256 --output outputs/my_lake256.png
+python src/main.py --target examples/targets/lake.jpg \
+                   --strokes examples/strokes/ \
+                   --canvas examples/canvases/black.jpg \
+                   --iterations 256 \
+                   --output outputs/my_lake256.png
 ```
 
 The result will look something like this:
