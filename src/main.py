@@ -1,3 +1,11 @@
+from pathlib import Path
+
+import toml
+from pydantic import ValidationError
+
+import genetic_artist_config
+
+
 def interrupt_program(before_exit=None):
     print("Interrupted!")
     print("Terminating")
@@ -7,6 +15,8 @@ def interrupt_program(before_exit=None):
 
     exit(1)
 
+# Make queue statically typed with a class which contains an image
+# or a message like LasImage or ProgramEnd
 
 try:
     import cli
@@ -19,6 +29,7 @@ except KeyboardInterrupt:
 
 
 # Not very good function ahead... Remember to fix it sometime
+# If the artist is faster than the loop wait time Keyboard interrupts will not work
 def show_progress_process(window_name: str, image_queue: Queue):
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -71,10 +82,23 @@ def main():
     if cli.ARGS.VERBOSE:
         print("Creating the genetic artist...")
 
+    # Load configuration
     try:
-        genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR,
-                                       canvas_img_path=cli.ARGS.CANVAS_IMG_FILE,
-                                       config_file_path=cli.ARGS.CONFIG_FILE)
+        toml_data = toml.loads(Path(cli.ARGS.CONFIG_FILE).read_text())
+    except FileNotFoundError as exception:
+        print(f"Config file \'{exception.filename}\' not found")
+        exit(1)
+
+    try:
+        config: genetic_artist_config.Configuration = genetic_artist_config.Configuration.parse_obj(toml_data)
+    except ValidationError as exception:
+        print(f"Config file exception: {exception}")
+        exit(1)
+
+    # Create the Genetic Artist
+    try:
+        genetic_artist = GeneticArtist(cli.ARGS.TARGET_IMG_FILE, cli.ARGS.STROKE_IMG_DIR, config,
+                                       canvas_img_path=cli.ARGS.CANVAS_IMG_FILE)
     except GeneticArtistException as exception:
         print(exception.message)
         exit(1)

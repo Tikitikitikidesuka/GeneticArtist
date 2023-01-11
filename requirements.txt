@@ -5,3 +5,5 @@ numpy~=1.23.3
 numba~=0.56.4
 pygad~=2.18.1
 pathos~=0.3.0
+pydantic~=1.10.4
+toml~=0.10.2

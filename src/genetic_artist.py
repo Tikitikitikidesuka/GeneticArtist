@@ -4,6 +4,9 @@ import cv2 as cv
 import numpy as np
 import image_ops
 from pathos.multiprocessing import Pool
+
+from src import genetic_artist_config
+
 # Multiprocessing: https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq
 # Why pathos: https://stackoverflow.com/a/21345308
 
@@ -16,7 +19,7 @@ class GeneticArtistException(Exception):
     """
 
     def __init__(self, message=''):
-        self.message = message
+        self.message = f'Genetic Artist error: {message}'
         super().__init__(self.message)
 
     def __str__(self):
@@ -63,6 +66,28 @@ class OutputImageError(GeneticArtistException):
         super().__init__(f'Failed to write output to \'{output_path}\'')
 
 
+class ConfigFileNotFoundError(GeneticArtistException):
+    """Exception raised when the config file is not found
+
+    Attributes:
+        file_path -- path to the missing config file
+    """
+
+    def __init__(self, config_path: str):
+        super().__init__(f'Config file \'{config_path}\' not found')
+
+
+class ConfigFileError(GeneticArtistException):
+    """Exception raised when the config file contains errors
+
+    Attributes:
+        error -- error description
+    """
+
+    def __init__(self, error: str):
+        super().__init__(f'Config file error: {error}')
+
+
 class PooledGA(pygad.GA):
     _threads: int
 
@@ -81,8 +106,7 @@ class PooledGA(pygad.GA):
 
 
 class GeneticArtist:
-    def __init__(self, target_img_path: str, stroke_img_dir_path: str, canvas_img_path: str = None,
-                 config_file_path: str = None):
+    def __init__(self, target_img_path: str, stroke_img_dir_path: str, config: genetic_artist_config.Configuration, canvas_img_path: str = None):
         # Define instance variables
         self._target_img: np.array
         self._canvas_img: np.array
@@ -125,18 +149,19 @@ class GeneticArtist:
         self._processes = 1
 
         # Setup PyGAD parameters
+        genetic_config = config.genetic_algorithm
         self._ga_parameters = {
-            'num_generations': 32,
+            'num_generations': genetic_config.generations,
             'fitness_func': lambda g, gidx: self._fitness_function(g, gidx),
-            'sol_per_pop': 64,
-            'num_parents_mating': 64 // 4,
+            'sol_per_pop': genetic_config.population_size,
+            'num_parents_mating': max(genetic_config.population_size // 4, genetic_config.population_size),
             'num_genes': len(self._gene_space),
             'gene_space': self._gene_space,
-            'keep_elitism': 2,
+            'keep_elitism': genetic_config.keep_elitism,
             'parent_selection_type': 'sss',
             'crossover_type': 'uniform',
             'mutation_type': 'random',
-            'mutation_probability': 0.2,
+            'mutation_probability': genetic_config.mutation_probability,
             'mutation_by_replacement': True,
         }
 

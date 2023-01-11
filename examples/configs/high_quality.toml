@@ -1,0 +1,5 @@
+[genetic_algorithm]
+    generations = 32
+    population_size = 32
+    keep_elitism = 2
+    mutation_probability = 0.3
