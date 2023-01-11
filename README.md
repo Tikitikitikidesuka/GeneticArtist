@@ -50,6 +50,7 @@ pip install -r requirements.txt
 ```shell
 python src/main.py --target <Target Image> \
                    --strokes <Stroke Directory> \
+                   --config <Config File> \
                    --iterations <Number of Strokes To Draw> \
                    --output <Ouptut Image>
 ```
@@ -69,6 +70,7 @@ To create a painting of the night sky, navigate to the project folder and run th
 python src/main.py --target examples/targets/moon.jpg \
                    --strokes examples/strokes/ \
                    --canvas examples/canvases/white.jpg \
+                   --config examples/configs/medium_quality.toml \
                    --iterations 256 \
                    --output outputs/my_moon256.png
 ```
@@ -87,6 +89,7 @@ If you prefer a peaceful lake landscape, run this command instead:
 python src/main.py --target examples/targets/lake.jpg \
                    --strokes examples/strokes/ \
                    --canvas examples/canvases/black.jpg \
+                   --config examples/configs/high_quality.toml \
                    --iterations 256 \
                    --output outputs/my_lake256.png
 ```
