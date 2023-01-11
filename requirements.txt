@@ -7,5 +7,5 @@ pygad~=2.18.1
 pathos~=0.3.0
 pydantic~=1.10.4
 toml~=0.10.2
-setuptools~=60.2.0
+setuptools~=65.5.1
 llvmlite~=0.39.1
