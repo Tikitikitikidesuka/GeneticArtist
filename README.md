@@ -55,6 +55,14 @@ python src/main.py --target <Target Image> \
                    --output <Ouptut Image>
 ```
 
+
+To hide the preview window add `--nogui` to the parameters.
+In case you do want it, remember to press ESC when the program finishes to close it.
+
+To get a detailed output of what the program is doing add `--verbose` to the parameters.
+
+> :gear: **The GUI is still a prototype and will be changed shortly**
+
 ## Try it Out!
 
 Ready to see the magic happen? Check out some examples of what you can create with _Genetic Artist_.
@@ -72,7 +80,8 @@ python src/main.py --target examples/targets/moon.jpg \
                    --canvas examples/canvases/white.jpg \
                    --config examples/configs/medium_quality.toml \
                    --iterations 256 \
-                   --output outputs/my_moon256.png
+                   --output outputs/my_moon256.png \
+                   --verbose
 ```
 
 This will produce a beautiful painting like the one shown below:
@@ -91,7 +100,8 @@ python src/main.py --target examples/targets/lake.jpg \
                    --canvas examples/canvases/black.jpg \
                    --config examples/configs/high_quality.toml \
                    --iterations 256 \
-                   --output outputs/my_lake256.png
+                   --output outputs/my_lake256.png \
+                   --verbose
 ```
 
 The result will look something like this:
