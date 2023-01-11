@@ -13,6 +13,7 @@ def interrupt_program(before_exit=None):
 
     exit(1)
 
+
 # Make queue statically typed with a class which contains an image
 # or a message like LasImage or ProgramEnd
 
@@ -108,12 +109,11 @@ def main():
     if not cli.ARGS.NO_GUI:
         image_queue = Queue()
         display_process = Process(name='DisplayProcess', target=show_progress_process, args=('Output', image_queue))
+        display_process.start()
 
         try:
-            display_process.start()
             run_genetic_artist(genetic_artist, image_queue=image_queue, verbose=cli.ARGS.VERBOSE)
             store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
-            display_process.join()
         except KeyboardInterrupt:
             def interrupt_func():
                 if display_process.is_alive():
@@ -124,6 +124,12 @@ def main():
 
             interrupt_program(interrupt_func)
 
+        if cli.ARGS.VERBOSE:
+            print("\nProcess finished successfully")
+            print("Press ESC on the preview window to close it")
+
+        display_process.join()
+
     else:
         try:
             run_genetic_artist(genetic_artist, verbose=cli.ARGS.VERBOSE)
@@ -133,6 +139,9 @@ def main():
                 store_genetic_artist_result(genetic_artist, cli.ARGS.OUTPUT_FILE, verbose=cli.ARGS.VERBOSE)
 
             interrupt_program(interrupt_func)
+
+        if cli.ARGS.VERBOSE:
+            print("\nProcess finished successfully")
 
 
 if __name__ == '__main__':
