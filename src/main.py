@@ -1,8 +1,6 @@
-from pathlib import Path
-
 import toml
+from pathlib import Path
 from pydantic import ValidationError
-
 import genetic_artist_config
 
 

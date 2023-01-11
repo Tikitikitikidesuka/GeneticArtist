@@ -4,8 +4,7 @@ import cv2 as cv
 import numpy as np
 import image_ops
 from pathos.multiprocessing import Pool
-
-from src import genetic_artist_config
+import genetic_artist_config
 
 # Multiprocessing: https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq
 # Why pathos: https://stackoverflow.com/a/21345308
