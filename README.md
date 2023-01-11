@@ -78,7 +78,7 @@ python src/main.py --target examples/targets/moon.jpg \
 This will produce a beautiful painting like the one shown below:
 
 <p align="center">
-    <img src="assets/outputs/moon0256.png" />
+    <img src="examples/outputs/moon0256.png" />
 </p>
 
 ### Lake Landscape
@@ -97,7 +97,7 @@ python src/main.py --target examples/targets/lake.jpg \
 The result will look something like this:
 
 <p align="center">
-    <img src="assets/outputs/lake0256.png" />
+    <img src="examples/outputs/lake0256.png" />
 </p>
 
 Feel free to experiment with different target images, strokes, and canvases to see what unique creations you can come up with!
