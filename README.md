@@ -55,13 +55,14 @@ python src/main.py --target <Target Image> \
                    --output <Ouptut Image>
 ```
 
-
-To hide the preview window add `--nogui` to the parameters.
-In case you do want it, remember to press ESC when the program finishes to close it.
-
 To get a detailed output of what the program is doing add `--verbose` to the parameters.
 
-> :gear: **The GUI is still a prototype and will be changed shortly**
+To hide the preview window add `--nogui` to the parameters.
+In case you do want it, remember to press ESC to close it when the program is done.
+
+> **Note**
+> 
+> The GUI is still a prototype and will be changed shortly
 
 ## Try it Out!
 
