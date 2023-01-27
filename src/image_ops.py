@@ -18,7 +18,8 @@ def scale_stroke(stroke_img: np.array, scale: float):
 
 
 def rotate_stroke(stroke_img: np.array, angle: float):
-    # https://pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/
+    #Adrian Rosebrock, Rotate images (correctly) with OpenCV and Python, PyImageSearch
+    #https://pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/, accessed on December 2022
     height, width = stroke_img.shape[:2]
     center = (width // 2, height // 2)
 
