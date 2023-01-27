@@ -44,7 +44,7 @@ def is_positive_non_zero_int(arg: str) -> int:
     return arg_num
 
 
-_parser = ArgumentParser(prog='Genetic Artist',
+_parser = ArgumentParser(prog='GeneticArtist',
                          description='Recreate any image by painting strokes into a canvas by means of a genetic algorithm',
                          epilog='Bottom text')
 
