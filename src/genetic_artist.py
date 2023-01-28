@@ -6,7 +6,6 @@ import image_ops
 from pathos.multiprocessing import Pool
 import genetic_artist_config
 
-# Multiprocessing: https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq
 # Why pathos: https://stackoverflow.com/a/21345308
 
 
@@ -88,17 +87,19 @@ class ConfigFileError(GeneticArtistException):
 
 
 class PooledGA(pygad.GA):
-    _threads: int
+    #Laszlo Fazekas, How Genetic Algorithms Can Compete with Gradient Descent and Backprop, Hackernoon
+    #https://hackernoon.com/how-genetic-algorithms-can-compete-with-gradient-descent-and-backprop-9m9t33bq, March 2021
+    _processes: int
 
-    def __init__(self, threads, **kwargs):
+    def __init__(self, processes, **kwargs):
         super().__init__(**kwargs)
-        self._threads = threads
+        self._processes = processes
 
     def fitness_wrapper(self, solution):
         return self.fitness_func(solution, 0)
 
     def cal_pop_fitness(self):
-        with Pool(processes=self._threads) as pool:
+        with Pool(processes=self._processes) as pool:
             pop_fitness = pool.map(self.fitness_wrapper, self.population)
             pop_fitness = np.array(pop_fitness)
             return pop_fitness
