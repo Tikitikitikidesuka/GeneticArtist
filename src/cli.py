@@ -45,8 +45,7 @@ def is_positive_non_zero_int(arg: str) -> int:
 
 
 _parser = ArgumentParser(prog='GeneticArtist',
-                         description='Recreate any image by painting strokes into a canvas by means of a genetic algorithm',
-                         epilog='Bottom text')
+                         description='Recreate any image by painting strokes into a canvas by means of a genetic algorithm')
 
 _parser.add_argument('-t', '--target', dest='TARGET_IMG_FILE', required=True, help='Target image path', type=is_valid_file)
 _parser.add_argument('-s', '--strokes', dest='STROKE_IMG_DIR', required=True, help='Stroke directory path', type=is_valid_directory)
